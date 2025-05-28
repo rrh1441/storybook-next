@@ -1,0 +1,16 @@
+{
+  "name": "storybook",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --filter storybook-web dev",
+    "build": "pnpm --filter storybook-web build && pnpm --filter storybook-pipeline build",
+    "lint": "pnpm --filter storybook-web lint && pnpm --filter storybook-pipeline lint",
+    "test": "pnpm --filter storybook-web test && pnpm --filter storybook-pipeline test",
+    "start": "pnpm --filter storybook-web start"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  }
+} 

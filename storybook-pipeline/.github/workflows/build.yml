@@ -1,0 +1,95 @@
+name: Build-Book-PDF
+
+on:
+  workflow_dispatch:
+    inputs:
+      order_id:
+        description: 'Order ID for the book generation'
+        required: true
+        type: string
+  push:
+    paths:
+      - 'pages/**'
+      - 'scripts/**'
+
+jobs:
+  build-pdf:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Validate input files
+      run: |
+        if [ ! -f "pages/prompts.json" ]; then
+          echo "Error: pages/prompts.json not found"
+          exit 1
+        fi
+        if [ ! -f "pages/text.json" ]; then
+          echo "Error: pages/text.json not found"
+          exit 1
+        fi
+
+    - name: Generate base images
+      run: npm run generate
+      env:
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
+    - name: Upscale and crop images
+      run: npm run upscale
+      env:
+        REPLICATE_API_TOKEN: ${{ secrets.REPLICATE_API_TOKEN }}
+
+    - name: Overlay text on images
+      run: npm run overlay
+
+    - name: Create PDF
+      run: npm run pdf
+
+    - name: Validate output
+      run: |
+        if [ ! -f "build/book-interior.pdf" ]; then
+          echo "Error: PDF was not generated"
+          exit 1
+        fi
+        
+        # Check file size (should be reasonable for a 25-page book)
+        size=$(stat -c%s "build/book-interior.pdf")
+        if [ $size -lt 1000000 ]; then  # Less than 1MB is suspicious
+          echo "Warning: PDF file size is very small ($size bytes)"
+        fi
+        if [ $size -gt 209715200 ]; then  # More than 200MB is too large
+          echo "Error: PDF file size is too large ($size bytes)"
+          exit 1
+        fi
+        
+        echo "PDF generated successfully: $size bytes"
+
+    - name: Upload PDF artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: storybook-pdf-${{ github.event.inputs.order_id || github.sha }}
+        path: build/book-interior.pdf
+        retention-days: 30
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: build-debug-${{ github.event.inputs.order_id || github.sha }}
+        path: |
+          build/images/
+          build/upscaled/
+          build/final/
+        retention-days: 7 

@@ -1,0 +1,35 @@
+{
+  "name": "storybook-pipeline",
+  "version": "1.0.0",
+  "description": "Standalone pipeline for generating print-ready storybook PDFs",
+  "main": "index.js",
+  "scripts": {
+    "generate": "tsx scripts/generate-base-images.ts",
+    "upscale": "tsx scripts/upscale-crop.ts",
+    "overlay": "tsx scripts/overlay-text.ts",
+    "pdf": "tsx scripts/make-pdf.ts",
+    "all": "npm run generate && npm run upscale && npm run overlay && npm run pdf",
+    "build": "npm run all",
+    "lint": "eslint scripts/**/*.ts",
+    "test": "echo \"No tests specified\" && exit 0"
+  },
+  "dependencies": {
+    "axios": "^1.6.2",
+    "openai": "^4.24.1",
+    "pdf-lib": "^1.17.1",
+    "replicate": "^0.25.1",
+    "sharp": "^0.33.2"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.3.1",
+    "@types/node": "^20.10.5",
+    "@typescript-eslint/eslint-plugin": "^6.15.0",
+    "@typescript-eslint/parser": "^6.15.0",
+    "eslint": "^8.56.0",
+    "tsx": "^4.6.2",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
