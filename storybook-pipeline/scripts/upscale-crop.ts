@@ -8,7 +8,6 @@ const replicate = new Replicate({
 })
 
 // Print dimensions: 8.25" × 8.25" at 300 DPI = 2475 × 2475 pixels
-const PRINT_SIZE = 2475
 const BLEED_SIZE = 2475 + (0.125 * 300 * 2) // Add 0.125" bleed on each side
 
 async function upscaleImage(inputPath: string, outputPath: string): Promise<void> {

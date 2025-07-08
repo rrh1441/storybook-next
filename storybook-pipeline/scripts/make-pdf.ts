@@ -1,6 +1,5 @@
 import { PDFDocument, rgb } from 'pdf-lib'
 import fs from 'fs/promises'
-import path from 'path'
 
 // Print dimensions: 8.25" × 8.25" with 0.125" bleed = 8.5" × 8.5"
 const PAGE_WIDTH = 8.5 * 72 // Convert inches to points
@@ -29,7 +28,6 @@ async function createPDF(): Promise<void> {
   const coverImage = await pdfDoc.embedPng(coverImageBytes)
   
   const coverPage = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT])
-  const coverDims = coverImage.scale(PAGE_WIDTH / coverImage.width)
   
   coverPage.drawImage(coverImage, {
     x: 0,

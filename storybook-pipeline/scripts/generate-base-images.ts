@@ -1,6 +1,5 @@
 import OpenAI from 'openai'
 import fs from 'fs/promises'
-import path from 'path'
 import axios from 'axios'
 
 const openai = new OpenAI({

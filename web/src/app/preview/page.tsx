@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { Order } from '@/types'
@@ -13,16 +13,7 @@ export default function PreviewPage() {
   const [loading, setLoading] = useState(true)
   const [purchasing, setPurchasing] = useState(false)
 
-  useEffect(() => {
-    if (!orderId) {
-      router.push('/')
-      return
-    }
-
-    fetchOrder()
-  }, [orderId])
-
-  const fetchOrder = async () => {
+  const fetchOrder = useCallback(async () => {
     try {
       const response = await fetch(`/api/orders/${orderId}`)
       if (response.ok) {
@@ -37,7 +28,16 @@ export default function PreviewPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [orderId, router])
+
+  useEffect(() => {
+    if (!orderId) {
+      router.push('/')
+      return
+    }
+
+    fetchOrder()
+  }, [orderId, router, fetchOrder])
 
   const handlePurchase = async () => {
     if (!orderId) return
@@ -104,7 +104,7 @@ export default function PreviewPage() {
               Your Story Preview is Ready! 🎉
             </h1>
             <p className="text-xl text-gray-600">
-              Here's a sneak peek of your personalized storybook
+              Here&apos;s a sneak peek of your personalized storybook
             </p>
           </div>
 
@@ -154,7 +154,7 @@ export default function PreviewPage() {
                 </div>
                 <div className="flex items-center justify-center space-x-2">
                   <span className="text-green-500">✓</span>
-                  <span>Print-ready PDF (8.25" × 8.25")</span>
+                  <span>Print-ready PDF (8.25&quot; × 8.25&quot;)</span>
                 </div>
                 <div className="flex items-center justify-center space-x-2">
                   <span className="text-green-500">✓</span>
