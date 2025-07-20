@@ -6,6 +6,7 @@ import PhotoUpload from '@/components/PhotoUpload'
 import ThemeSelector from '@/components/ThemeSelector'
 import StoryIdeaInput from '@/components/StoryIdeaInput'
 import { ChildDescriptor, StoryTheme } from '@/types'
+import { showToast } from '@/components/ui/toast'
 
 export default function CreatePage() {
   const router = useRouter()
@@ -49,10 +50,11 @@ export default function CreatePage() {
       }
 
       const { orderId } = await response.json()
+      showToast('Preview generated successfully!', 'success')
       router.push(`/preview?order_id=${orderId}`)
     } catch (error) {
       console.error('Error generating preview:', error)
-      alert('Failed to generate preview. Please try again.')
+      showToast('Failed to generate preview. Please try again.', 'error')
     } finally {
       setIsGenerating(false)
     }

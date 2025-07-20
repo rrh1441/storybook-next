@@ -37,13 +37,32 @@ export async function getStorybooksByUser(): Promise<{ data: Storybook[] | null;
     }
 
     const { data, error } = await supabase
-      .from('storybooks')
+      .from('orders')
       .select('*')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
 
     if (error) throw error
-    return { data, error: null }
+    
+    // Transform orders to match Storybook interface
+    const storybooks = data?.map(order => ({
+      id: order.id,
+      user_id: order.user_id,
+      title: order.title || 'Untitled Story',
+      theme: order.theme?.name || order.theme || '',
+      main_character: order.main_character || order.child_descriptor?.appearance || '',
+      educational_focus: order.educational_focus || '',
+      reference_image_url: order.reference_image_url || order.hero_image_url || '',
+      hero_image_url: order.hero_image_url || '',
+      hero_approved: order.hero_approved || false,
+      hero_generation_attempts: 0,
+      story_approved: order.story_approved || false,
+      status: order.status || 'draft',
+      created_at: order.created_at,
+      updated_at: order.updated_at
+    }))
+    
+    return { data: storybooks || null, error: null }
   } catch (error) {
     return { data: null, error: error as Error }
   }

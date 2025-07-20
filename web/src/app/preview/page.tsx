@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { Order } from '@/types'
+import { showToast } from '@/components/ui/toast'
 
 export default function PreviewPage() {
   const searchParams = useSearchParams()
@@ -56,11 +57,11 @@ export default function PreviewPage() {
         const { sessionUrl } = await response.json()
         window.location.href = sessionUrl
       } else {
-        alert('Failed to create checkout session')
+        showToast('Failed to create checkout session', 'error')
       }
     } catch (error) {
       console.error('Error creating checkout:', error)
-      alert('Failed to create checkout session')
+      showToast('Failed to create checkout session', 'error')
     } finally {
       setPurchasing(false)
     }

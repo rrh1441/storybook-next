@@ -3,6 +3,8 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { QueryProvider } from '@/components/providers/QueryProvider'
+import ErrorBoundary from '@/components/ErrorBoundary'
+import { ToastContainer } from '@/components/ui/toast'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-geist-sans' })
 
@@ -20,11 +22,14 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.variable} font-sans antialiased`}>
-        <QueryProvider>
-          <AuthProvider>
-            {children}
-          </AuthProvider>
-        </QueryProvider>
+        <ErrorBoundary>
+          <QueryProvider>
+            <AuthProvider>
+              {children}
+              <ToastContainer />
+            </AuthProvider>
+          </QueryProvider>
+        </ErrorBoundary>
       </body>
     </html>
   )

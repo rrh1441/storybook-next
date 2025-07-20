@@ -1,10 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createCheckoutSession } from '@/lib/stripe'
 import { supabaseAdmin } from '@/lib/supabase'
+import { handleApiError, AppError } from '@/lib/error-handler'
 
 export async function POST(request: NextRequest) {
   try {
     const { orderId } = await request.json()
+    
+    if (!orderId) {
+      throw new AppError('Order ID is required', 400)
+    }
 
     // Get order details
     const { data: order, error } = await supabaseAdmin
@@ -14,10 +19,7 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error || !order) {
-      return NextResponse.json(
-        { error: 'Order not found' },
-        { status: 404 }
-      )
+      throw new AppError('Order not found', 404)
     }
 
     // Create Stripe checkout session
@@ -34,10 +36,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ sessionUrl: session.url })
   } catch (error) {
-    console.error('Error creating checkout session:', error)
-    return NextResponse.json(
-      { error: 'Failed to create checkout session' },
-      { status: 500 }
-    )
+    return handleApiError(error)
   }
 } 

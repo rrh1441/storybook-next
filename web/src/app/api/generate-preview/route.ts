@@ -3,21 +3,40 @@ import { openai } from '@/lib/openai'
 import { supabaseAdmin } from '@/lib/supabase'
 import { createHeroImagePrompt, createTeaserStoryPrompt } from '@/lib/prompts'
 import { ChildDescriptor, StoryTheme, StoryPage } from '@/types'
+import { handleApiError, AppError } from '@/lib/error-handler'
 
 export async function POST(request: NextRequest) {
   try {
+    const body = await request.json()
+    
+    // Validate required fields
+    if (!body.childDescriptor || !body.theme || !body.storyIdea || !body.email) {
+      throw new AppError('Missing required fields', 400)
+    }
+    
     const { childDescriptor, theme, storyIdea, email }: {
       childDescriptor: ChildDescriptor
       theme: StoryTheme
       storyIdea: string
       email: string
-    } = await request.json()
+    } = body
+
+    // Get the authenticated user if available
+    const authHeader = request.headers.get('authorization')
+    let userId = null
+    
+    if (authHeader) {
+      const token = authHeader.replace('Bearer ', '')
+      const { data: { user } } = await supabaseAdmin.auth.getUser(token)
+      userId = user?.id
+    }
 
     // Create order record
     const { data: order, error: orderError } = await supabaseAdmin
       .from('orders')
       .insert({
         email,
+        user_id: userId,
         child_descriptor: childDescriptor,
         theme,
         story_idea: storyIdea,
@@ -90,10 +109,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ orderId: order.id })
   } catch (error) {
-    console.error('Error generating preview:', error)
-    return NextResponse.json(
-      { error: 'Failed to generate preview' },
-      { status: 500 }
-    )
+    return handleApiError(error)
   }
 } 
